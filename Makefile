@@ -1,15 +1,15 @@
-HELL := /bin/bash
-CC = g++
-TARGET = dmalloc
+SHELL := /bin/bash
+CC = ibm-clang++64
+TARGET = libdmalloc.a
 CFLAGS = -Wall -Wextra -ggdb -O0
 OBJS = dmalloc.o
 all: $(TARGET)
 
 $(TARGET) : $(OBJS)
-		ar rcs libdmalloc.a $(OBJS)
-%.o: src/%.c
-		$(CC) $(CFLAGS) -c $<
+	ar rcs $(TARGET) $(OBJS)
+%.o: %.cpp
+	$(CC) $(CFLAGS) -c $<
 clean:
-		@rm -f $(OBJS) $(TARGET)
+	@rm -f $(OBJS) $(TARGET)
 run:
-		./$(TARGET)
+	./$(TARGET)
