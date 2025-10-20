@@ -27,7 +27,7 @@ extern "C" {
             free(ptr);
         } else {
             // Send warning to stderr and cause double free
-            fprintf("Pointer %p was aleady freed\n", ptr);
+            fprintf(stderr, "Pointer %p was aleady freed\n", ptr);
             free(ptr); 
         }
         //printf("Freed\n");
