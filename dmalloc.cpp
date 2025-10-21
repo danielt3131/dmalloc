@@ -14,17 +14,30 @@ size_t amountFreed = 0;
 std::unordered_map<void *, size_t> allocMap;
 std::unordered_map<void *, size_t> freeList;
 extern "C" {
+    /**
+     * @brief To see if a pointer is in the free list and removes it
+     * @param ptr the pointer to check
+     */
     void removeFromFreeList(void *ptr) {
         if (freeList.find(ptr) != freeList.end()) {
-	    freeList.erase(ptr);
-	}
+	        freeList.erase(ptr);
+	    }
     } 
+    /**
+     * @brief Hooked in call for malloc()
+     * @param size The number of bytes to allocate
+     * @return void* The allocated pointer
+     */
     void *dmalloc(size_t size) {
         void *tmp = malloc(size);
         allocMap.insert({tmp, size});
-	removeFromFreeList(tmp);
+	    removeFromFreeList(tmp);
         return tmp;
     }
+    /**
+     * @brief Hooked in call for free()
+     * @param ptr The pointer to free
+     */
     void dfree(void *ptr) {
         // Not in free list
         if (freeList.find(ptr) == freeList.end()) {
@@ -38,10 +51,16 @@ extern "C" {
         }
         //printf("Freed\n");
     }
+    /**
+     * @brief Hooked in call for realloc()
+     * @param ptr The pointer to reallocate
+     * @param size The number of bytes to reallocate 
+     * @return void* The new pointer
+     */
     void *drealloc(void *ptr, size_t size) {
         // Ptr present
         void *tmp = realloc(ptr, size);
-	removeFromFreeList(tmp);
+	    removeFromFreeList(tmp);
         if (tmp == ptr) {
             if (allocMap.find(ptr) != allocMap.end()) {
                 allocMap[ptr] = size;
@@ -53,12 +72,18 @@ extern "C" {
             return tmp;
         }
     }
+    /**
+     * @brief Hooked in call for calloc()
+     * @param amt The number of elements
+     * @param size The size of each amount
+     * @return void* The allocated pointer with the memory zeroed out 
+     */
     void *dcalloc(size_t amt, size_t size) {
         void *tmp = calloc(amt, size);
         size_t actualSize = amt * size;
         allocMap.insert({tmp, actualSize});
         removeFromFreeList(tmp);
-	return tmp;
+	    return tmp;
     }
     /**
      * @brief Creates a report of all memory allocations and frees
