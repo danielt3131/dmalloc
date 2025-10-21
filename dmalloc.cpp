@@ -14,9 +14,15 @@ size_t amountFreed = 0;
 std::unordered_map<void *, size_t> allocMap;
 std::unordered_map<void *, size_t> freeList;
 extern "C" {
+    void removeFromFreeList(void *ptr) {
+        if (freeList.find(ptr) != freeList.end()) {
+	    freeList.erase(ptr);
+	}
+    } 
     void *dmalloc(size_t size) {
         void *tmp = malloc(size);
         allocMap.insert({tmp, size});
+	removeFromFreeList(tmp);
         return tmp;
     }
     void dfree(void *ptr) {
@@ -35,6 +41,7 @@ extern "C" {
     void *drealloc(void *ptr, size_t size) {
         // Ptr present
         void *tmp = realloc(ptr, size);
+	removeFromFreeList(tmp);
         if (tmp == ptr) {
             if (allocMap.find(ptr) != allocMap.end()) {
                 allocMap[ptr] = size;
@@ -50,7 +57,8 @@ extern "C" {
         void *tmp = calloc(amt, size);
         size_t actualSize = amt * size;
         allocMap.insert({tmp, actualSize});
-        return tmp;
+        removeFromFreeList(tmp);
+	return tmp;
     }
     /**
      * @brief Creates a report of all memory allocations and frees
@@ -63,7 +71,8 @@ extern "C" {
                 amountFreed += freeList.at(it->first);
             } else {
                 memoryLeak = true;
-                std::cout << it->first << " | " << it->second << std::endl;
+                fprintf(fp, "Pointer %p | Size: %zu\n", it->first, it->second);
+		//std::cout << it->first << " | " << it->second << std::endl;
             }
             amountAllocated += it->second;
         }
@@ -71,8 +80,8 @@ extern "C" {
         if (memoryLeak) {
             fprintf(fp, "Memory leak present!!!\n");
         }
-        fprintf(fp, "Amount allocated %d\n", amountAllocated);
-        fprintf(fp, "Amount Freed %d\n", amountFreed);
+        fprintf(fp, "Amount allocated %zu\n", amountAllocated);
+        fprintf(fp, "Amount Freed %zu\n", amountFreed);
         
     }
 }
