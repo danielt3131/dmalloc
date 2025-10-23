@@ -1,0 +1,41 @@
+.TH DMALLOC 3 2025-10-21
+.SH NAME
+dmalloc is a compile time memory tracker for libc memory allocation & deallocation calls.  
+
+Requires the C++ standard library
+
+xlc cannot find dmalloc.h you must give the absolute path "/z/tools/include/dmalloc.h"
+
+xlclang is able to find dmalloc.h
+.SH SYNOPSIS
+.LP
+.nf
+#include <dmalloc.h>
+.P
+void printReport(FILE \fI*fp\fP);
+.fi
+
+.SH LINKING
+
+xlclang++ *.o /z/tools/lib/libdmalloc.a
+
+.SH EXAMPLE
+.nf
+#include <dmalloc.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+int main() {
+    char *buffer = malloc(1000);
+    // Use buffer
+    free(buffer);
+    printReport(stdout);  // Prints report to stdout
+}
+.fi
+
+.SH AUTHOR
+   Daniel Thompson
+.SH COPYRIGHT
+COPYRIGHT 2025 Daniel Thompson Licensed under the GNU GPLv2 or later license
+https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+
